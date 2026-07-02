@@ -177,9 +177,13 @@ class Oracle:
         data = mujoco.MjData(self.model)
         T = states.shape[0]
         sensordata = np.empty((T, self.model.nsensordata))
+        # kinematic reconstruction only: sanitize diverged model states so
+        # mj_forward stays finite; divergence itself is flagged upstream
+        safe = np.clip(np.nan_to_num(states, nan=0.0, posinf=1e6, neginf=-1e6),
+                       -1e6, 1e6)
         for t in range(T):
-            data.qpos[:] = states[t, :self.nq]
-            data.qvel[:] = states[t, self.nq:]
+            data.qpos[:] = safe[t, :self.nq]
+            data.qvel[:] = safe[t, self.nq:]
             mujoco.mj_forward(self.model, data)
             sensordata[t] = data.sensordata
         return self._tracked(sensordata)

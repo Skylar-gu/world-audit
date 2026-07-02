@@ -151,7 +151,7 @@ def train_cell(scene: str, capacity: str, budget: str, seed: int = 0,
         "kind": "model", "model_id": model_id,
         "capacity": capacity, "budget": budget, "ensemble": E,
         "seed": model_seed, "epochs": epochs, "batch": batch, "lr": lr,
-        "data_path": d["path"], "torch": torch.__version__,
+        "data_path": d["path"], "torch": str(torch.__version__),
         "holdout_nll": holdout_nll, "train_nll": train_nll, "holdout_mse": holdout_mse,
     }
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
@@ -168,7 +168,10 @@ def train_cell(scene: str, capacity: str, budget: str, seed: int = 0,
 
 
 def load_model(path: str | Path) -> tuple[EnsembleDynamics, dict]:
-    ckpt = torch.load(path, weights_only=True, map_location="cpu")
+    # TorchVersion appears in manifests of ckpts saved before the str() fix;
+    # it's our own trusted artifact, so allowlist just that type.
+    with torch.serialization.safe_globals([torch.torch_version.TorchVersion]):
+        ckpt = torch.load(path, weights_only=True, map_location="cpu")
     net = EnsembleDynamics(ckpt["ds"], ckpt["da"], tuple(ckpt["hidden"]), seed=0, e=ckpt["e"])
     net.load_state_dict(ckpt["state_dict"])
     net.eval()

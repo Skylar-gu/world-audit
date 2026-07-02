@@ -1,0 +1,27 @@
+{
+  "git_sha": "2ef1186b9a711cd7c68c58a12976a28dccb2fe4c",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "arm",
+  "scene_hash": "b6f2116573d13114",
+  "kind": "grid-run",
+  "K": 10,
+  "seed": 0,
+  "horizon": 1500,
+  "models": [
+    "arm-2x64-100k",
+    "arm-2x64-5k",
+    "arm-3x256-100k",
+    "arm-3x256-5k",
+    "arm-4x512-100k",
+    "arm-4x512-5k"
+  ],
+  "results": [
+    "experiments/artifacts/results/arm/arm-2x64-5k__df9c4b2f11450c3a.json",
+    "experiments/artifacts/results/arm/arm-3x256-5k__79eec1f4f739d699.json",
+    "experiments/artifacts/results/arm/arm-4x512-5k__80942917a0be3c59.json",
+    "experiments/artifacts/results/arm/arm-2x64-100k__4d7a597322f93300.json",
+    "experiments/artifacts/results/arm/arm-3x256-100k__1651ea9972bd46d4.json",
+    "experiments/artifacts/results/arm/arm-4x512-100k__2db571870c360d05.json"
+  ]
+}
