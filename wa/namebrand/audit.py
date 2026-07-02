@@ -246,6 +246,26 @@ class StateEmbedding:
         cols += [s[:, [self.nq + d]] for _, d in self._vel]
         return np.concatenate(cols, axis=1)
 
+    def inverse_qpos(self, embedded: np.ndarray,
+                     override: dict[str, float] | None = None) -> np.ndarray:
+        """Embedded rows -> renderable qpos (T, nq). Wrapped angles via atan2.
+
+        Unobservable coords (e.g. rootx) decode to garbage; pass `override`
+        to pin them to a disclosed constant for rendering."""
+        e = np.atleast_2d(embedded)
+        qpos = np.zeros((e.shape[0], self.nq))
+        for c, (name, i) in enumerate(self._raw):
+            qpos[:, i] = e[:, c]
+        base = len(self._raw)
+        for k, (name, i) in enumerate(self._wrap):
+            qpos[:, i] = np.arctan2(e[:, base + 2 * k + 1], e[:, base + 2 * k])
+        for name, val in (override or {}).items():
+            for lst in (self._raw, self._wrap):
+                for n, i in lst:
+                    if n == name:
+                        qpos[:, i] = val
+        return qpos
+
 
 class MLPDecoder:
     """Small MLP probe z -> (qpos, qvel); the ridge upgrade §7 allows."""
@@ -314,6 +334,12 @@ def collect_episodes(agent, env: WalkerEnv, device, n_episodes: int = N_EPISODES
 def run(seed: int = 0) -> Path:
     t_start = time.time()
     agent, cfg, device = load_agent()
+    # The official planner (MPPI) samples from torch's *global* RNG — the one
+    # source of randomness here we cannot route through an explicit Generator
+    # without forking their code. Pin it from the audit seed instead
+    # (documented deviation from invariant 3's letter, faithful to its intent:
+    # the whole audit is reproducible from `seed`).
+    torch.manual_seed(derive_seed(seed, "tdmpc2-planner"))
     env = WalkerEnv(seed=1)
     nq = env.physics.model.nq
 
@@ -412,13 +438,16 @@ def _poke_audit(agent, env: WalkerEnv, decoder, device, seed: int,
     def perturbed(m: float) -> np.ndarray:
         return perturb_actions(nominal, m, u, POKE_T0, POKE_DUR)
 
-    def truth_traj(actions: np.ndarray) -> np.ndarray:
+    def truth_traj_raw(actions: np.ndarray) -> np.ndarray:
         env.restore(snap)
         out = np.empty((HORIZON, env.physics.model.nq + env.physics.model.nv))
         for t, a in enumerate(actions):
             env.step(a)
             out[t] = env.state_vec()
-        return emb.transform(out)
+        return out
+
+    def truth_traj(actions: np.ndarray) -> np.ndarray:
+        return emb.transform(truth_traj_raw(actions))
 
     def model_traj(actions: np.ndarray) -> np.ndarray:
         z0 = encode(agent, obs_star, device)
@@ -434,13 +463,23 @@ def _poke_audit(agent, env: WalkerEnv, decoder, device, seed: int,
 
     truth_null, model_null = tn1, mn1
     obs_idx = emb.observable
+    clips_dir = Path(f"experiments/artifacts/rollouts-v{config.AUDIT_VERSION}/namebrand")
+    clips_dir.mkdir(parents=True, exist_ok=True)
+    rootx0 = float(snap["qpos"][[i for n, i in emb._raw if n == "rootx"][0]])
     r_t, r_m = [], []
-    for m in MAGNITUDES:
+    for mi, m in enumerate(MAGNITUDES):
         acts = perturbed(float(m))
-        dt = truth_traj(acts) - truth_null
-        dm = model_traj(acts) - model_null
+        truth_raw = truth_traj_raw(acts)
+        model_emb = model_traj(acts)
+        dt = emb.transform(truth_raw) - truth_null
+        dm = model_emb - model_null
         r_t.append(float(np.linalg.norm(dt[-1][obs_idx])))
         r_m.append(float(np.linalg.norm(dm[-1][obs_idx])))
+        np.savez_compressed(  # render assets: truth qpos + decoded model qpos
+            clips_dir / f"{TASK}__ctrl__m{mi}.npz",
+            truth_qpos=truth_raw[:, :env.physics.model.nq].astype(np.float32),
+            model_qpos=emb.inverse_qpos(model_emb, {"rootx": rootx0}).astype(np.float32),
+            rootx0=rootx0)
         print(f"  m={m:5.2f}  truth response {r_t[-1]:8.3f}   model response {r_m[-1]:8.3f}")
 
     r_t, r_m = np.array(r_t), np.array(r_m)

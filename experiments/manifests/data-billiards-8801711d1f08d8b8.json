@@ -1,5 +1,5 @@
 {
-  "git_sha": "44a168d2fe697f90ec335c16d2572e53d0655883",
+  "git_sha": "1bd760369ebb21b1e2dd5fc5eba30129a20c7e77",
   "mujoco": "3.10.0",
   "numpy": "2.4.6",
   "scene": "billiards",

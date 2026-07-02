@@ -31,7 +31,7 @@ function LightLegend({ config }) {
   )
 }
 
-function Detail({ scene, model, subtest, config }) {
+function Detail({ scene, model, subtest, config, namebrand }) {
   const [mi, setMi] = useState(4)
   const entries = subtest.entries
   const entry = entries[Math.min(mi, entries.length - 1)]
@@ -68,9 +68,13 @@ function Detail({ scene, model, subtest, config }) {
                 <input type="range" min="0" max={entries.length - 1} value={mi}
                        aria-label="poke magnitude"
                        onChange={(e) => setMi(+e.target.value)} />
-                <span className="mag">{entry.magnitude.toFixed(2)} N</span>
+                <span className="mag">
+                  {entry.magnitude.toFixed(2)}{entry.curves.x_label.includes('(N)') ? ' N' : ''}
+                </span>
               </div>
-              <div className="note">{copy['clip-caption']}</div>
+              <div className="note">
+                {namebrand ? copy['namebrand-clip-caption'] : copy['clip-caption']}
+              </div>
             </>
           ) : (
             <div className="note">No clip for this row; the curve is the audit
@@ -156,7 +160,8 @@ function ScenePage({ scene, config }) {
         </table>
       </div>
       {model && subtest &&
-        <Detail scene={scene} model={model} subtest={subtest} config={config} />}
+        <Detail scene={scene} model={model} subtest={subtest} config={config}
+                namebrand={!!nb} />}
     </>
   )
 }

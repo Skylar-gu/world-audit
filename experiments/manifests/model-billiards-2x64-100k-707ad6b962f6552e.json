@@ -1,5 +1,5 @@
 {
-  "git_sha": "44a168d2fe697f90ec335c16d2572e53d0655883",
+  "git_sha": "1bd760369ebb21b1e2dd5fc5eba30129a20c7e77",
   "mujoco": "3.10.0",
   "numpy": "2.4.6",
   "scene": "billiards",
@@ -13,7 +13,7 @@
   "epochs": 40,
   "batch": 256,
   "lr": 0.001,
-  "data_path": "experiments/data/billiards-5a25baa8429189d0.npz",
+  "data_path": "experiments/data/billiards-8801711d1f08d8b8.npz",
   "torch": "2.6.0+cu124",
   "holdout_nll": 1206.370849609375,
   "train_nll": -4.516541957855225,

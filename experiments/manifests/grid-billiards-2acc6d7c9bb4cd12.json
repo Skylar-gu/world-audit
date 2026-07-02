@@ -1,0 +1,27 @@
+{
+  "git_sha": "1bd760369ebb21b1e2dd5fc5eba30129a20c7e77",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "billiards",
+  "scene_hash": "bcf5c9125c4758cf",
+  "kind": "grid-run",
+  "K": 10,
+  "seed": 0,
+  "horizon": 1500,
+  "models": [
+    "billiards-2x64-100k",
+    "billiards-2x64-5k",
+    "billiards-3x256-100k",
+    "billiards-3x256-5k",
+    "billiards-4x512-100k",
+    "billiards-4x512-5k"
+  ],
+  "results": [
+    "experiments/artifacts/results/billiards/billiards-2x64-5k__384553353952138e.json",
+    "experiments/artifacts/results/billiards/billiards-3x256-5k__4f010c2e1e08e123.json",
+    "experiments/artifacts/results/billiards/billiards-4x512-5k__dbeb6823e6f361aa.json",
+    "experiments/artifacts/results/billiards/billiards-2x64-100k__a4ffb6e4740d090d.json",
+    "experiments/artifacts/results/billiards/billiards-3x256-100k__410e72dd22f23f76.json",
+    "experiments/artifacts/results/billiards/billiards-4x512-100k__9c51e85b8ef204fe.json"
+  ]
+}

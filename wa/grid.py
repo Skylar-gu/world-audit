@@ -146,6 +146,10 @@ def run_grid(scene: str, seed: int = config.AUDIT_SEED, K: int = config.K_SAMPLE
     return out_paths
 
 
+def _existing_clip(rel_url: str) -> str | None:
+    return rel_url if (SITE_MANIFEST.parent / rel_url).exists() else None
+
+
 def rebuild_site_manifest() -> dict:
     """Site manifest from newest results per (scene, model): §2 schema.
     scenes[] -> models[] -> subtests[] -> entries[]."""
@@ -210,9 +214,11 @@ def rebuild_site_manifest() -> dict:
                 "name": st["name"], "score": st["score"], "light": st["light"],
                 "diverged": st["diverged"], "details": st["details"],
                 "entries": [{
-                    "poke_id": st["poke_id"], "magnitude": mag, "clip_url": None,
+                    "poke_id": st["poke_id"], "magnitude": mag,
+                    "clip_url": _existing_clip(
+                        f"clips/tdmpc2-{r['task']}/tdmpc2-{r['task']}__ctrl__m{mi}.webm"),
                     "curves": st["curves"], "score": st["score"], "light": st["light"],
-                } for mag in st["curves"]["x"]],
+                } for mi, mag in enumerate(st["curves"]["x"])],
             } for st in r.get("subtests", [])],
         }
         scenes.append({"name": f"tdmpc2-{r['task']}", "namebrand": True,

@@ -96,15 +96,15 @@ class SceneRenderer:
 
 def _annotate(frame: np.ndarray, label: str, clock_s: float, poke_on: bool,
               font) -> np.ndarray:
+    h, w = frame.shape[:2]
     img = Image.fromarray(frame)
     draw = ImageDraw.Draw(img)
-    draw.rectangle([0, 0, PANEL_W, 30], fill=BANNER)
+    draw.rectangle([0, 0, w, 30], fill=BANNER)
     draw.text((8, 6), label, fill=INK, font=font)
-    draw.text((PANEL_W - 74, 6), f"t={clock_s:5.2f}s", fill=INK, font=font)
+    draw.text((w - 74, 6), f"t={clock_s:5.2f}s", fill=INK, font=font)
     if poke_on:
         for k in range(4):  # flash: thick border + tag
-            draw.rectangle([k, k, PANEL_W - 1 - k, PANEL_H - 1 - k],
-                           outline=POKE_FLASH)
+            draw.rectangle([k, k, w - 1 - k, h - 1 - k], outline=POKE_FLASH)
         draw.rectangle([8, 40, 78, 64], fill=POKE_FLASH)
         draw.text((16, 44), "POKE", fill=(255, 255, 255), font=font)
     return np.asarray(img)
