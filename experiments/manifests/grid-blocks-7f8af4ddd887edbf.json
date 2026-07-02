@@ -1,0 +1,27 @@
+{
+  "git_sha": "87a886b1b3ceb9e93f1a652d01e3c314bbf2eed9",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "blocks",
+  "scene_hash": "ca8ac4a4d0fd64da",
+  "kind": "grid-run",
+  "K": 10,
+  "seed": 0,
+  "horizon": 1500,
+  "models": [
+    "blocks-2x64-100k",
+    "blocks-2x64-5k",
+    "blocks-3x256-100k",
+    "blocks-3x256-5k",
+    "blocks-4x512-100k",
+    "blocks-4x512-5k"
+  ],
+  "results": [
+    "experiments/artifacts/results/blocks/blocks-2x64-5k__754e3d39176a1794.json",
+    "experiments/artifacts/results/blocks/blocks-3x256-5k__2bc537ffe00b2787.json",
+    "experiments/artifacts/results/blocks/blocks-4x512-5k__e6239d2ed220aae2.json",
+    "experiments/artifacts/results/blocks/blocks-2x64-100k__6b6f20540b66414f.json",
+    "experiments/artifacts/results/blocks/blocks-3x256-100k__75959a0c6f2a5bed.json",
+    "experiments/artifacts/results/blocks/blocks-4x512-100k__b09530e03d20f0e2.json"
+  ]
+}

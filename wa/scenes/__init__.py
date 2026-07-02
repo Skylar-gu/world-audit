@@ -57,7 +57,7 @@ REGISTRY: dict[str, SceneSpec] = {
             poke_sites=("cue",),
             poke_directions={"cue": (1.0, 0.0, 0.0)},
             magnitude_range=(0.5, 24.0),
-            subtests=("response", "momentum"),
+            subtests=("response", "momentum", "divergence"),
             chain=("cue", "ball_1", "ball_2", "ball_3"),
         ),
         SceneSpec(
@@ -67,7 +67,7 @@ REGISTRY: dict[str, SceneSpec] = {
             poke_sites=("block_3", "block_2"),
             poke_directions={"block_3": (1.0, 0.0, 0.0), "block_2": (1.0, 0.0, 0.0)},
             magnitude_range=(1.0, 60.0),
-            subtests=("response", "propagation", "stability"),
+            subtests=("response", "propagation", "stability", "divergence"),
             chain=("block_3", "block_2", "block_1", "block_0"),
             topple_body="block_3",
             topple_z=0.20,  # initial top-block z is 0.28; below 0.20 == toppled
@@ -79,7 +79,7 @@ REGISTRY: dict[str, SceneSpec] = {
             poke_sites=("link_3",),
             poke_directions={"link_3": (1.0, 0.0, 0.0)},
             magnitude_range=(0.5, 20.0),
-            subtests=("response", "propagation"),
+            subtests=("response", "propagation", "divergence"),
             chain=("link_3", "link_2", "link_1"),
         ),
     ]

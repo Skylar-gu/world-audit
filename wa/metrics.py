@@ -225,7 +225,28 @@ def stability(spec: SceneSpec, truth: list[ContrastSet],
                     "disagreement_mags": _san(mags[topple_t != topple_m])})
 
 
+# ------------------------------------------------------------------ divergence
+
+def divergence_time(spec: SceneSpec, truth: list[ContrastSet],
+                    model: list[ContrastSet]) -> MetricResult:
+    """Time-to-divergence per magnitude; truth never diverges (horizon).
+
+    score = mean over magnitudes of (horizon − t_div) / horizon: 0.0 means the
+    model stays finite for the full audit horizon, 1.0 means instant blowup.
+    """
+    T = next(iter(truth[0].contrast.values())).shape[1]
+    mags = spec.magnitudes()
+    t_div = np.array([T if cs.diverged_at is None else cs.diverged_at
+                      for cs in model], dtype=np.float64)
+    score = float(np.mean((T - t_div) / T))
+    return _result("divergence", truth[0].poke.site, score, mags,
+                   "poke magnitude (N)", np.full(len(mags), float(T)), t_div,
+                   t_div, t_div, _any_diverged(model),
+                   {"horizon_steps": T, "unit": "steps survived"})
+
+
 SUBTESTS = {
+    "divergence": divergence_time,
     "response": response_curve,
     "momentum": momentum_check,
     "propagation": propagation,

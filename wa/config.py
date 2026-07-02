@@ -12,6 +12,11 @@ SCORE_CAP = 99.9     # scores are capped here for JSON; light computed pre-cap
 DIVERGENCE_LIMIT = 1e3   # |state| beyond this marks a model rollout as diverged
 AUDIT_SEED = 0       # root seed for the audit grid
 
+# Bump when the audit-subject definition or a metric changes: it enters every
+# grid content key, so stale results/rollouts are never silently reused.
+# v2: model rollouts renormalize quaternions; divergence-time subtest added.
+AUDIT_VERSION = 2
+
 
 def light(score: float) -> str:
     import math

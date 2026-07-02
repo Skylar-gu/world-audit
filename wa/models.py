@@ -191,8 +191,12 @@ def rollout_model(net: EnsembleDynamics, oracle: Oracle, init_state: np.ndarray,
     estimate (null contrast exactly zero by construction).
 
     Compounding one-step error is the phenomenon under audit, not a bug.
+    Quaternion blocks are renormalized after each step (audit v2): predicted
+    states must stay on the state manifold so failures are physical rather
+    than numerical; the dynamics error itself is never corrected.
     """
     horizon = horizon or oracle.scene.horizon
+    quat_slices = oracle.quat_slices
     ds = oracle.nq + oracle.nv
     s0 = oracle.qpos_qvel_from_snapshot(init_state)
     a_seq = torch.from_numpy(oracle.force_channels(poke, horizon)).float()
@@ -213,6 +217,8 @@ def rollout_model(net: EnsembleDynamics, oracle: Oracle, init_state: np.ndarray,
             x.unsqueeze(0).expand(net.e, -1, -1),
             eps[:, t].unsqueeze(0).expand(net.e, -1, -1))  # (E, K, ds)
         s = s + d_all[members, arange]
+        for sl in quat_slices:
+            s[:, sl] = s[:, sl] / s[:, sl].norm(dim=1, keepdim=True).clamp_min(1e-8)
         states[:, t] = s
 
     out = []

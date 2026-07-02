@@ -151,6 +151,24 @@ class Oracle:
 
     # ------------------------------------------------------- model-side helpers
 
+    @property
+    def quat_slices(self) -> list[slice]:
+        """qpos slices holding unit quaternions (free/ball joints).
+
+        Model rollouts renormalize these each step so predicted states stay on
+        the state manifold; without this, quat drift compounds into numerical
+        (rather than physical) divergence.
+        """
+        out = []
+        for j in range(self.model.njnt):
+            jt = self.model.jnt_type[j]
+            adr = int(self.model.jnt_qposadr[j])
+            if jt == mujoco.mjtJoint.mjJNT_FREE:
+                out.append(slice(adr + 3, adr + 7))
+            elif jt == mujoco.mjtJoint.mjJNT_BALL:
+                out.append(slice(adr, adr + 4))
+        return out
+
     def qpos_qvel_from_snapshot(self, init_state: np.ndarray) -> np.ndarray:
         """(nq+nv,) flattened state out of an INTEGRATION snapshot."""
         restore(self.model, self.data, init_state)

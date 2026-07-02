@@ -141,6 +141,20 @@ def test_diverged_model_is_red_and_json_safe():
     assert all(v is None for v in j["curves"]["y_model"])
 
 
+def test_divergence_time_score():
+    from wa.metrics import divergence_time
+    spec = get_scene("billiards")
+    truth = _linear_contrast(spec, scale=0.01)
+    model = _linear_contrast(spec, scale=0.01, K=4)
+    r = divergence_time(spec, truth, model)
+    assert r.score == pytest.approx(0.0) and r.light == "green"
+    for cs in model:
+        cs.diverged_at = T // 2
+    r2 = divergence_time(spec, truth, model)
+    assert r2.score == pytest.approx(0.5) and r2.light == "red"
+    assert r2.y_model == [T // 2] * spec.n_magnitudes
+
+
 def test_san_and_lights():
     assert _san([1.0, np.inf, np.nan, -np.inf]) == [1.0, None, None, None]
     assert config.light(0.05) == "green"

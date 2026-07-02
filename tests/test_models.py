@@ -113,6 +113,20 @@ def test_data_load_nested_budgets(tmp_path, monkeypatch):
     assert small["holdout_obs"].shape[0] == 200
 
 
+def test_model_rollout_quats_stay_unit_norm():
+    """Audit v2: predicted states stay on the state manifold (quat renorm)."""
+    oracle = Oracle("billiards")
+    s0 = oracle.init_state()
+    net = EnsembleDynamics(oracle.nq + oracle.nv, 3, hidden=(16,), seed=5, e=3)
+    pairs = rollout_model(net, oracle, s0, None, K=2, seed=9, horizon=40,
+                          with_tracked=False)
+    for sl in oracle.quat_slices:
+        for p in pairs:
+            norms = np.linalg.norm(p.states[:, sl], axis=1)
+            finite = np.isfinite(norms)
+            assert np.allclose(norms[finite], 1.0, atol=1e-5)
+
+
 def test_poke_enters_model_input():
     """The action channel is live: a strong poke changes model rollouts."""
     oracle = Oracle("billiards")

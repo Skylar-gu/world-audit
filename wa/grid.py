@@ -27,7 +27,7 @@ from wa.scenes import REGISTRY, get_scene
 
 ARTIFACTS = Path("experiments/artifacts")
 RESULTS_DIR = ARTIFACTS / "results"
-ROLLOUTS_DIR = ARTIFACTS / "rollouts"
+ROLLOUTS_DIR = ARTIFACTS / f"rollouts-v{config.AUDIT_VERSION}"
 MANIFEST_DIR = Path("experiments/manifests")
 SITE_MANIFEST = Path("site/public/manifest.json")
 
@@ -100,6 +100,7 @@ def run_grid(scene: str, seed: int = config.AUDIT_SEED, K: int = config.K_SAMPLE
     stamp = manifest_stamp(spec)
     for mid, (net, model_manifest) in models.items():
         key = content_hash({
+            "audit_version": config.AUDIT_VERSION,
             "scene_hash": spec.xml_hash(), "model": model_manifest,
             "poke_site": site, "mags": [p.magnitude for p in pokes],
             "K": K, "seed": seed, "horizon": horizon,

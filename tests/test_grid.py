@@ -44,7 +44,7 @@ def test_grid_smoke_billiards(tmp_path, monkeypatch):
     assert len(paths) == 1 and paths[0].exists()
     r = json.loads(paths[0].read_text())
     assert r["null_test"] == "pass"
-    assert [s["name"] for s in r["subtests"]] == ["response", "momentum"]
+    assert [s["name"] for s in r["subtests"]] == ["response", "momentum", "divergence"]
     assert len(r["magnitudes"]) == 8
 
     m = json.loads((tmp_path / "site/manifest.json").read_text())
