@@ -7,3 +7,4 @@ site/node_modules/
 site/dist/
 experiments/data/
 experiments/models/
+site/public/clips/
