@@ -17,8 +17,17 @@ function Chip({ subtest, selected, onClick }) {
           role="button" tabIndex={0}>
       <span className={`dot ${subtest.light}`} />
       {subtest.score.toFixed(2)}
-      <span className="word">{subtest.light}</span>
     </span>
+  )
+}
+
+function LightLegend({ config }) {
+  return (
+    <div className="light-legend" aria-label="traffic light legend">
+      <span><span className="dot green" /> ≤ {config.light_green} {copy['legend-green']}</span>
+      <span><span className="dot yellow" /> ≤ {config.light_yellow} {copy['legend-yellow']}</span>
+      <span><span className="dot red" /> &gt; {config.light_yellow} {copy['legend-red']}</span>
+    </div>
   )
 }
 
@@ -33,8 +42,8 @@ function Detail({ scene, model, subtest, config }) {
         {subtest.diverged && <span className="badge-diverged">diverged</span>}
       </h3>
       <div className="sub">
-        score {subtest.score.toFixed(3)} ({subtest.light}) · poke site: {entry.poke_id} ·
-        thresholds green ≤ {config.light_green}, yellow ≤ {config.light_yellow}
+        <span className={`dot ${subtest.light}`} style={{ display: 'inline-block', marginRight: 6 }} />
+        score {subtest.score.toFixed(3)} · poke site: {entry.poke_id}
       </div>
       <div className="detail">
         <div>
@@ -75,6 +84,7 @@ function ScenePage({ scene, config }) {
     <>
       <div className="card">
         <p className="intro">{copy['report-intro']}</p>
+        <LightLegend config={config} />
         <table className="report">
           <thead>
             <tr>

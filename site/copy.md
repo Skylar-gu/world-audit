@@ -12,6 +12,15 @@ We poke a simulated world, poke a learned model of it the same way, and compare 
 ## report-intro
 Each row is one learned dynamics model (ensemble of 5, trained on logged interactions). Each column is one behavioral sub-test built from paired counterfactuals: the same initial state, with and without a calibrated poke. Click a cell to see the curve and the side-by-side rollout.
 
+## legend-green
+matches ground truth
+
+## legend-yellow
+noticeable error
+
+## legend-red
+wrong or diverged
+
 ## clip-caption
 Left: ground truth (MuJoCo). Right: model-predicted states, simulator renderer. Clocks are synchronized; the red flash marks the poke window.
 

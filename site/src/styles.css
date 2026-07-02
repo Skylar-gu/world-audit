@@ -69,7 +69,11 @@ td.model-id { font-family: ui-monospace, monospace; font-size: 12px; color: var(
 .dot.green { background: var(--good); }
 .dot.yellow { background: var(--warn); }
 .dot.red { background: var(--crit); }
-.chip .word { font-size: 11px; color: var(--muted); }
+.light-legend {
+  display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2);
+  margin: 0 0 12px;
+}
+.light-legend > span { display: inline-flex; align-items: center; gap: 6px; }
 
 .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
 @media (max-width: 900px) { .detail { grid-template-columns: 1fr; } }
