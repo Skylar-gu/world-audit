@@ -39,5 +39,11 @@ Ground truth is MuJoCo with a pinned version, Newton solver, tolerance 0 (fixed 
 ## method-thresholds
 Traffic lights: score ≤ {green} is green, ≤ {yellow} is yellow, otherwise red. Thresholds were calibrated once on the model spectrum and then frozen; they are identical for every model and printed here from the same config the pipeline used. K = {k} contrast samples per model per magnitude.
 
+## namebrand-caveat
+This row audits an official pre-trained TD-MPC2 checkpoint. TD-MPC2 is a decoder-free latent world model, so we trained a probe to decode its latent state back to physical coordinates; the probe's held-out R² per coordinate is the audit's noise floor and is reported below. Pokes are applied through the task's actuators (the only input channel the latent model has). Root x position is excluded because the observation is translation-invariant — unrecoverable by construction, not by choice — and unlimited revolute angles are decoded as (cos, sin) pairs, since an angle's winding count is likewise not a physical observable; the audit compares postures, not winding numbers.
+
+## namebrand-killed
+Kill criterion triggered: the decoder probe failed to reach R² ≥ 0.9 on observable position coordinates, so state-space scores would mostly measure decoder error rather than model error. Per the audit's pre-registered rule, no report card is shown for this model; the decoder R² table below is the honest negative result.
+
 ## footer
 All assets on this page are precomputed by the audit pipeline; the page renders a manifest and plays clips — nothing is simulated in your browser.

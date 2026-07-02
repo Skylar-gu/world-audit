@@ -25,5 +25,8 @@ render:
 site:
 	cd site && npm run build
 
+namebrand:
+	MUJOCO_GL=egl $(PY) -m wa.namebrand.audit
+
 demo:
 	$(MAKE) data SCENE=$(SCENE) && $(MAKE) train SCENE=$(SCENE) && $(MAKE) grid SCENE=$(SCENE) && $(MAKE) render && $(MAKE) site

@@ -151,6 +151,8 @@ def rebuild_site_manifest() -> dict:
     scenes[] -> models[] -> subtests[] -> entries[]."""
     newest: dict[tuple[str, str], dict] = {}
     for p in sorted(RESULTS_DIR.glob("*/*.json"), key=lambda p: p.stat().st_mtime):
+        if p.parent.name == "namebrand":  # different schema, handled below
+            continue
         r = json.loads(p.read_text())
         newest[(r["scene"], r["model_id"])] = r
 
@@ -185,6 +187,36 @@ def rebuild_site_manifest() -> dict:
             })
         if model_rows:
             scenes.append({"name": scene, "models": model_rows})
+
+    # name-brand rows (spec §7): different provenance, same schema + caveats
+    for p in sorted((RESULTS_DIR / "namebrand").glob("*.json"),
+                    key=lambda p: p.stat().st_mtime):
+        r = json.loads(p.read_text())
+        dec = r["decoder"]
+        row = {
+            "model_id": f"TD-MPC2 5M ({r['task']}, official checkpoint)",
+            "capacity": "5M latent", "budget": "official",
+            "holdout_nll": None,
+            "null_test": r.get("null_test", "n/a (killed)"),
+            "namebrand": {
+                "agent_return_mean": round(float(np.mean(r["agent_returns"])), 1),
+                "decoder_type": dec["type"],
+                "min_observable_pos_r2": round(dec["min_observable_pos_r2"], 4),
+                "excluded_coords": dec["excluded_coords"],
+                "killed": dec["killed"],
+                "r2_per_coord": dec["r2_per_coord"],
+            },
+            "subtests": [{
+                "name": st["name"], "score": st["score"], "light": st["light"],
+                "diverged": st["diverged"], "details": st["details"],
+                "entries": [{
+                    "poke_id": st["poke_id"], "magnitude": mag, "clip_url": None,
+                    "curves": st["curves"], "score": st["score"], "light": st["light"],
+                } for mag in st["curves"]["x"]],
+            } for st in r.get("subtests", [])],
+        }
+        scenes.append({"name": f"tdmpc2-{r['task']}", "namebrand": True,
+                       "models": [row]})
 
     manifest = {
         "generated_unix": int(time.time()),

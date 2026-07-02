@@ -51,25 +51,63 @@ function Detail({ scene, model, subtest, config }) {
                  marker={entry.curves.x_label.includes('(N)') ? mi : null} />
           <div className="legend">
             <span><span className="swatch" style={{ background: 'var(--ink)' }} />simulated ground truth</span>
-            <span><span className="swatch" style={{ background: 'var(--series-1)' }} />model mean (band: K-sample 10–90%)</span>
+            <span><span className="swatch" style={{ background: 'var(--series-1)' }} />
+              {subtest.details?.K === 1 ? 'model (deterministic)' : 'model mean (band: K-sample 10–90%)'}</span>
           </div>
           {subtest.name === 'momentum' && <div className="note">{copy['momentum-note']}</div>}
           {subtest.diverged && <div className="note">{copy['divergence-note']}</div>}
         </div>
         <div>
-          <video key={entry.clip_url} autoPlay loop muted playsInline controls>
-            <source src={entry.clip_url} type="video/webm" />
-            <source src={entry.clip_url.replace('.webm', '.mp4')} type="video/mp4" />
-          </video>
-          <div className="slider-row">
-            <input type="range" min="0" max={entries.length - 1} value={mi}
-                   aria-label="poke magnitude"
-                   onChange={(e) => setMi(+e.target.value)} />
-            <span className="mag">{entry.magnitude.toFixed(2)} N</span>
-          </div>
-          <div className="note">{copy['clip-caption']}</div>
+          {entry.clip_url ? (
+            <>
+              <video key={entry.clip_url} autoPlay loop muted playsInline controls>
+                <source src={entry.clip_url} type="video/webm" />
+                <source src={entry.clip_url.replace('.webm', '.mp4')} type="video/mp4" />
+              </video>
+              <div className="slider-row">
+                <input type="range" min="0" max={entries.length - 1} value={mi}
+                       aria-label="poke magnitude"
+                       onChange={(e) => setMi(+e.target.value)} />
+                <span className="mag">{entry.magnitude.toFixed(2)} N</span>
+              </div>
+              <div className="note">{copy['clip-caption']}</div>
+            </>
+          ) : (
+            <div className="note">No clip for this row; the curve is the audit
+              output. Poke channel: {entry.poke_id}.</div>
+          )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function NamebrandCard({ nb }) {
+  const r2 = Object.entries(nb.r2_per_coord)
+  return (
+    <div className="card">
+      <p className="intro">{copy['namebrand-caveat']}</p>
+      {nb.killed && <p className="intro" style={{ color: 'var(--crit)' }}>
+        {copy['namebrand-killed']}</p>}
+      <div className="sub" style={{ marginBottom: 8 }}>
+        agent return (mean): {nb.agent_return_mean} · decoder: {nb.decoder_type} ·
+        min observable-position R²: {nb.min_observable_pos_r2} ·
+        excluded: {nb.excluded_coords.join(', ')}
+      </div>
+      <table className="report" style={{ maxWidth: 560 }}>
+        <thead><tr><th>coordinate</th><th>holdout R²</th></tr></thead>
+        <tbody>
+          {r2.map(([k, v]) => (
+            <tr key={k}>
+              <td className="model-id">{k}</td>
+              <td style={{ fontVariantNumeric: 'tabular-nums',
+                           color: v < 0.9 ? 'var(--crit)' : 'var(--ink)' }}>
+                {v.toFixed(3)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -80,8 +118,10 @@ function ScenePage({ scene, config }) {
   const [sel, setSel] = useState({ model: 0, subtest: 0 })
   const model = models[sel.model]
   const subtest = model?.subtests[sel.subtest]
+  const nb = models[0]?.namebrand
   return (
     <>
+      {nb && <NamebrandCard nb={nb} />}
       <div className="card">
         <p className="intro">{copy['report-intro']}</p>
         <LightLegend config={config} />

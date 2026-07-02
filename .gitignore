@@ -8,3 +8,5 @@ site/dist/
 experiments/data/
 experiments/models/
 site/public/clips/
+third_party/
+experiments/namebrand/
