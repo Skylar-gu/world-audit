@@ -1,0 +1,21 @@
+{
+  "git_sha": "44a168d2fe697f90ec335c16d2572e53d0655883",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "billiards",
+  "scene_hash": "bcf5c9125c4758cf",
+  "kind": "model",
+  "model_id": "billiards-4x512-100k",
+  "capacity": "4x512",
+  "budget": "100k",
+  "ensemble": 5,
+  "seed": 4145779159379614153,
+  "epochs": 40,
+  "batch": 256,
+  "lr": 0.001,
+  "data_path": "experiments/data/billiards-5a25baa8429189d0.npz",
+  "torch": "2.6.0+cu124",
+  "holdout_nll": -3.917137861251831,
+  "train_nll": -4.048810005187988,
+  "holdout_mse": 2.4830985069274902
+}

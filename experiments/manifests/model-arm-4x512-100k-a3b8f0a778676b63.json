@@ -1,0 +1,21 @@
+{
+  "git_sha": "44a168d2fe697f90ec335c16d2572e53d0655883",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "arm",
+  "scene_hash": "b6f2116573d13114",
+  "kind": "model",
+  "model_id": "arm-4x512-100k",
+  "capacity": "4x512",
+  "budget": "100k",
+  "ensemble": 5,
+  "seed": 8970192994528637383,
+  "epochs": 40,
+  "batch": 256,
+  "lr": 0.001,
+  "data_path": "experiments/data/arm-6dd5c3ce8c8a14db.npz",
+  "torch": "2.6.0+cu124",
+  "holdout_nll": -3.5637941360473633,
+  "train_nll": -3.557649612426758,
+  "holdout_mse": 0.05404852703213692
+}

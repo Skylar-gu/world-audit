@@ -1,0 +1,18 @@
+{
+  "git_sha": "44a168d2fe697f90ec335c16d2572e53d0655883",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "blocks",
+  "scene_hash": "ca8ac4a4d0fd64da",
+  "kind": "data",
+  "seed": 0,
+  "n_total": 110000,
+  "holdout": 10000,
+  "budgets": {
+    "5k": 5000,
+    "100k": 100000
+  },
+  "rollout_horizon": 500,
+  "passive_frac": 0.3,
+  "init_jitter": 0.005
+}

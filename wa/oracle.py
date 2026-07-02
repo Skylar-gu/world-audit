@@ -149,6 +149,41 @@ class Oracle:
             sensordata[t] = self.data.sensordata
         return self._pair(state, sensordata, poke, seed)
 
+    # ------------------------------------------------------- model-side helpers
+
+    def qpos_qvel_from_snapshot(self, init_state: np.ndarray) -> np.ndarray:
+        """(nq+nv,) flattened state out of an INTEGRATION snapshot."""
+        restore(self.model, self.data, init_state)
+        return np.concatenate([self.data.qpos.copy(), self.data.qvel.copy()])
+
+    def force_channels(self, poke: Poke | None, horizon: int) -> np.ndarray:
+        """(T, 3*len(poke_sites)) applied-force input channel, ordered by poke_sites.
+
+        This is the action representation shared by training data and model
+        rollouts, so "the same poke" is well-defined on the model side (§4).
+        """
+        out = np.zeros((horizon, 3 * len(self.scene.poke_sites)), dtype=np.float64)
+        if poke is not None:
+            i = self.scene.poke_sites.index(poke.site)
+            t0, t1 = poke.t_start, poke.t_start + poke.duration
+            out[t0:t1, 3 * i:3 * i + 3] = poke.force
+        return out
+
+    def tracked_from_states(self, states: np.ndarray) -> dict[str, np.ndarray]:
+        """Tracked series from (T, nq+nv) states by kinematics only (mj_forward).
+
+        Used for model-predicted trajectories; never steps physics (invariant 6).
+        """
+        data = mujoco.MjData(self.model)
+        T = states.shape[0]
+        sensordata = np.empty((T, self.model.nsensordata))
+        for t in range(T):
+            data.qpos[:] = states[t, :self.nq]
+            data.qvel[:] = states[t, self.nq:]
+            mujoco.mj_forward(self.model, data)
+            sensordata[t] = data.sensordata
+        return self._tracked(sensordata)
+
     # ---------------------------------------------------------------- assembly
 
     @property

@@ -1,0 +1,21 @@
+{
+  "git_sha": "44a168d2fe697f90ec335c16d2572e53d0655883",
+  "mujoco": "3.10.0",
+  "numpy": "2.4.6",
+  "scene": "blocks",
+  "scene_hash": "ca8ac4a4d0fd64da",
+  "kind": "model",
+  "model_id": "blocks-4x512-5k",
+  "capacity": "4x512",
+  "budget": "5k",
+  "ensemble": 5,
+  "seed": 17333557874005480797,
+  "epochs": 300,
+  "batch": 256,
+  "lr": 0.001,
+  "data_path": "experiments/data/blocks-c8375504c800d799.npz",
+  "torch": "2.6.0+cu124",
+  "holdout_nll": 225.95101928710938,
+  "train_nll": -4.339513778686523,
+  "holdout_mse": 0.7549323439598083
+}
