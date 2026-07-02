@@ -1,0 +1,44 @@
+<mujoco model="billiards">
+  <option timestep="0.002" integrator="Euler" solver="Newton" tolerance="0" iterations="30"/>
+
+  <default>
+    <geom friction="0.4 0.005 0.0001" solref="0.004 1" solimp="0.95 0.99 0.001"/>
+  </default>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" diffuse="0.9 0.9 0.9"/>
+    <geom name="table" type="plane" size="0.7 0.5 0.02" rgba="0.1 0.45 0.2 1"/>
+    <geom name="wall_xp" type="box" pos="0.65 0 0.04" size="0.02 0.5 0.04" rgba="0.35 0.2 0.1 1"/>
+    <geom name="wall_xn" type="box" pos="-0.65 0 0.04" size="0.02 0.5 0.04" rgba="0.35 0.2 0.1 1"/>
+    <geom name="wall_yp" type="box" pos="0 0.45 0.04" size="0.65 0.02 0.04" rgba="0.35 0.2 0.1 1"/>
+    <geom name="wall_yn" type="box" pos="0 -0.45 0.04" size="0.65 0.02 0.04" rgba="0.35 0.2 0.1 1"/>
+
+    <body name="cue" pos="-0.3 0 0.03">
+      <freejoint name="cue_free"/>
+      <geom name="cue_geom" type="sphere" size="0.03" mass="0.17" rgba="0.95 0.95 0.9 1"/>
+    </body>
+    <body name="ball_1" pos="0 0 0.03">
+      <freejoint name="ball_1_free"/>
+      <geom name="ball_1_geom" type="sphere" size="0.03" mass="0.17" rgba="0.85 0.15 0.15 1"/>
+    </body>
+    <body name="ball_2" pos="0.26 0.06 0.03">
+      <freejoint name="ball_2_free"/>
+      <geom name="ball_2_geom" type="sphere" size="0.03" mass="0.17" rgba="0.9 0.75 0.1 1"/>
+    </body>
+    <body name="ball_3" pos="0.26 -0.06 0.03">
+      <freejoint name="ball_3_free"/>
+      <geom name="ball_3_geom" type="sphere" size="0.03" mass="0.17" rgba="0.15 0.3 0.8 1"/>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <framepos name="cue.pos" objtype="body" objname="cue"/>
+    <framelinvel name="cue.vel" objtype="body" objname="cue"/>
+    <framepos name="ball_1.pos" objtype="body" objname="ball_1"/>
+    <framelinvel name="ball_1.vel" objtype="body" objname="ball_1"/>
+    <framepos name="ball_2.pos" objtype="body" objname="ball_2"/>
+    <framelinvel name="ball_2.vel" objtype="body" objname="ball_2"/>
+    <framepos name="ball_3.pos" objtype="body" objname="ball_3"/>
+    <framelinvel name="ball_3.vel" objtype="body" objname="ball_3"/>
+  </sensor>
+</mujoco>
