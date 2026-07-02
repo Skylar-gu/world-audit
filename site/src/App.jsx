@@ -1,0 +1,154 @@
+import { useEffect, useMemo, useState } from 'react'
+import Curve from './Curve.jsx'
+import copy from './copy.js'
+
+const BUDGET_ORDER = { '100k': 0, '5k': 1 }
+const CAP_ORDER = { '2x64': 0, '3x256': 1, '4x512': 2 }
+
+function sortModels(models) {
+  return [...models].sort((a, b) =>
+    (BUDGET_ORDER[a.budget] ?? 9) - (BUDGET_ORDER[b.budget] ?? 9) ||
+    (CAP_ORDER[a.capacity] ?? 9) - (CAP_ORDER[b.capacity] ?? 9))
+}
+
+function Chip({ subtest, selected, onClick }) {
+  return (
+    <span className={`chip ${selected ? 'selected' : ''}`} onClick={onClick}
+          role="button" tabIndex={0}>
+      <span className={`dot ${subtest.light}`} />
+      {subtest.score.toFixed(2)}
+      <span className="word">{subtest.light}</span>
+    </span>
+  )
+}
+
+function Detail({ scene, model, subtest, config }) {
+  const [mi, setMi] = useState(4)
+  const entries = subtest.entries
+  const entry = entries[Math.min(mi, entries.length - 1)]
+  return (
+    <div className="card">
+      <h3>
+        {model.model_id} — {subtest.name}
+        {subtest.diverged && <span className="badge-diverged">diverged</span>}
+      </h3>
+      <div className="sub">
+        score {subtest.score.toFixed(3)} ({subtest.light}) · poke site: {entry.poke_id} ·
+        thresholds green ≤ {config.light_green}, yellow ≤ {config.light_yellow}
+      </div>
+      <div className="detail">
+        <div>
+          <Curve curves={entry.curves}
+                 marker={entry.curves.x_label.includes('(N)') ? mi : null} />
+          <div className="legend">
+            <span><span className="swatch" style={{ background: 'var(--ink)' }} />simulated ground truth</span>
+            <span><span className="swatch" style={{ background: 'var(--series-1)' }} />model mean (band: K-sample 10–90%)</span>
+          </div>
+          {subtest.name === 'momentum' && <div className="note">{copy['momentum-note']}</div>}
+          {subtest.diverged && <div className="note">{copy['divergence-note']}</div>}
+        </div>
+        <div>
+          <video key={entry.clip_url} autoPlay loop muted playsInline controls>
+            <source src={entry.clip_url} type="video/webm" />
+            <source src={entry.clip_url.replace('.webm', '.mp4')} type="video/mp4" />
+          </video>
+          <div className="slider-row">
+            <input type="range" min="0" max={entries.length - 1} value={mi}
+                   aria-label="poke magnitude"
+                   onChange={(e) => setMi(+e.target.value)} />
+            <span className="mag">{entry.magnitude.toFixed(2)} N</span>
+          </div>
+          <div className="note">{copy['clip-caption']}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ScenePage({ scene, config }) {
+  const models = useMemo(() => sortModels(scene.models), [scene])
+  const subtestNames = models[0]?.subtests.map((s) => s.name) ?? []
+  const [sel, setSel] = useState({ model: 0, subtest: 0 })
+  const model = models[sel.model]
+  const subtest = model?.subtests[sel.subtest]
+  return (
+    <>
+      <div className="card">
+        <p className="intro">{copy['report-intro']}</p>
+        <table className="report">
+          <thead>
+            <tr>
+              <th>model</th><th>capacity</th><th>data</th><th>holdout NLL</th>
+              {subtestNames.map((n) => <th key={n}>{n}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {models.map((m, i) => (
+              <tr key={m.model_id}>
+                <td className="model-id">{m.model_id}</td>
+                <td>{m.capacity}</td>
+                <td>{m.budget}</td>
+                <td style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {m.holdout_nll == null ? '—'
+                    : Math.abs(m.holdout_nll) >= 1e4 ? m.holdout_nll.toExponential(1)
+                    : m.holdout_nll.toFixed(2)}
+                </td>
+                {m.subtests.map((s, j) => (
+                  <td key={s.name}>
+                    <Chip subtest={s}
+                          selected={sel.model === i && sel.subtest === j}
+                          onClick={() => setSel({ model: i, subtest: j })} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {model && subtest &&
+        <Detail scene={scene} model={model} subtest={subtest} config={config} />}
+    </>
+  )
+}
+
+function MethodPage({ config }) {
+  const thresholds = copy['method-thresholds']
+    .replace('{green}', config.light_green)
+    .replace('{yellow}', config.light_yellow)
+    .replace('{k}', config.k_samples)
+  return (
+    <div className="card method">
+      <h2>{copy['method-title']}</h2>
+      <p>{copy['method-body']}</p>
+      <p>{thresholds}</p>
+      <p>{copy['momentum-note']}</p>
+      <p>{copy['divergence-note']}</p>
+    </div>
+  )
+}
+
+export default function App() {
+  const [manifest, setManifest] = useState(null)
+  const [tab, setTab] = useState(0)
+  useEffect(() => {
+    fetch('manifest.json').then((r) => r.json()).then(setManifest)
+  }, [])
+  if (!manifest) return <div className="loading">loading manifest…</div>
+  const tabs = [...manifest.scenes.map((s) => s.name), 'method']
+  return (
+    <div className="wrap">
+      <h1>{copy.title}</h1>
+      <p className="tagline">{copy.tagline}</p>
+      <div className="tabs">
+        {tabs.map((t, i) => (
+          <button key={t} className={`tab ${tab === i ? 'active' : ''}`}
+                  onClick={() => setTab(i)}>{t}</button>
+        ))}
+      </div>
+      {tab < manifest.scenes.length
+        ? <ScenePage scene={manifest.scenes[tab]} config={manifest.config} />
+        : <MethodPage config={manifest.config} />}
+      <footer>{copy.footer}</footer>
+    </div>
+  )
+}

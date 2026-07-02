@@ -196,7 +196,8 @@ def rebuild_site_manifest() -> dict:
         "scenes": scenes,
     }
     SITE_MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-    SITE_MANIFEST.write_text(json.dumps(manifest, indent=2))
+    # compact separators: this file dominates first-load bytes on the site
+    SITE_MANIFEST.write_text(json.dumps(manifest, separators=(",", ":")))
     return manifest
 
 
