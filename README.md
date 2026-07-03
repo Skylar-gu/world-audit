@@ -1,42 +1,43 @@
-# worldaudit — behavioral physics audits for learned world models
+# worldaudit — do learned world models actually know physics?
 
-We poke a simulated world, poke a learned model of it the same way, and compare
-what happens next. Every score is a comparison against **simulated ground truth**
-from a pinned MuJoCo build — never against an idealized law.
+We poke a simulated world, give a learned model of that world the exact same
+poke, and compare what happens next. Every score compares the model against
+**simulated ground truth** from a pinned MuJoCo build — never against an
+idealized textbook law.
 
-The output is a static site of report cards: per scene, per model, per sub-test
-(impulse response, momentum transfer, disturbance propagation, stability
-threshold, time-to-divergence), each with paired counterfactual curves and
-side-by-side truth|model clips.
+The output is a static website of report cards: for each scene and each model,
+five behavioral tests (impulse response, momentum transfer, disturbance
+propagation, stability threshold, time-to-divergence), each with paired
+curves and side-by-side truth-vs-model video clips.
 
-## Why behavioral audits
+## Why test behavior instead of training loss
 
-Every model here has excellent one-step training metrics; the report cards
-still range from green to catastrophically red. One-step likelihood measures
-what a model was trained on; the audit measures whether the physics holds
-together over seconds of iterated prediction — which is what you actually use
-a world model for.
+Every model here looks great on its one-step training metrics — yet the report
+cards range from green to badly red. One-step accuracy measures what the model
+was trained on; the audit measures whether its physics stays coherent over
+seconds of predictions fed back into themselves, which is how world models are
+actually used.
 
-## Method guarantees (enforced in CI, bitwise)
+## Built-in correctness checks (run in CI, exact to the last bit)
 
-- **Oracle null test:** restore a mid-trajectory snapshot (`mjSTATE_INTEGRATION`,
-  warm-start included) and re-step 1000 steps — reproduces the original
-  continuation bit-for-bit. A second variant cross-checks `mujoco.rollout`
-  against raw `mj_step`.
-- **Contrast null test:** a zero-magnitude poke yields an *exactly* zero
-  contrast — truth side, and model side under common random numbers (each
-  sample's ensemble member and head-noise sequence are shared between the
-  poked and unpoked rollouts).
-- All randomness flows through explicit seeds; artifacts are immutable and
-  stamped (git SHA, library versions, scene hash, config hash); regeneration
-  goes to a new content-addressed path.
-- Rendering never steps physics: clips are kinematic playback of stored
+- **Oracle null test:** save the simulator mid-trajectory, restore it, and run
+  1000 more steps — the continuation must match the original bit-for-bit.
+  A second check confirms two independent simulation code paths agree the
+  same way.
+- **Contrast null test:** a poke with zero strength must produce a measured
+  effect of exactly zero — for the simulator, and for the model too (the poked
+  and unpoked runs share the same random numbers, so noise cancels perfectly).
+- Every random number comes from an explicit seed. Every output file is
+  immutable and stamped with the exact code version, library versions, and
+  settings that produced it; regenerating anything writes to a new path
+  instead of overwriting.
+- Video rendering never runs physics: clips are pure playback of stored
   trajectories, labeled "model-predicted states, simulator renderer."
 
 ## Reproduce
 
 Requires Linux, an NVIDIA GPU (developed on a single L40S), Python 3.11,
-Node ≥ 20. Versions are pinned in `requirements.lock`.
+Node ≥ 20. Exact versions are pinned in `requirements.lock`.
 
 ```bash
 python3.11 -m venv .venv && .venv/bin/pip install -r requirements.lock
@@ -45,23 +46,26 @@ make demo SCENE=billiards  # data → train → grid → render → site, from s
 cd site && npx vite preview
 ```
 
-`make demo` regenerates one scene end-to-end (training data, the 6-model
-ensemble spectrum, contrasts + metrics + manifest, clips, static site) on a
-single GPU box. Individual stages: `make data / train / grid / render / site`.
+`make demo` rebuilds one scene end-to-end (training data, six models of varying
+quality, contrasts + metrics, clips, static site) on a single GPU box.
+Individual stages: `make data / train / grid / render / site`.
 
 The name-brand audit (`make namebrand`) runs an official TD-MPC2 checkpoint
-through the same protocol via a decoder probe whose held-out R² is reported as
-the audit's noise floor (pre-registered kill criterion: R² < 0.9 on observable
-positions ⇒ publish the negative, drop the report card). It additionally needs
-`third_party/tdmpc2` (cloned from the official repo) and downloads the
-checkpoint from HuggingFace.
+through the same protocol. TD-MPC2 predicts in a latent space, so a trained
+probe translates its state back to physical coordinates; the probe's held-out
+accuracy (R²) is reported as the audit's noise floor, with a pre-registered
+kill rule — if the probe can't reach R² ≥ 0.9 on observable positions, the
+report card is dropped and the negative result published instead. This stage
+also needs `third_party/tdmpc2` (cloned from the official repo) and downloads
+the checkpoint from HuggingFace.
 
-## Honesty perimeter
+## Honesty rules
 
 - Momentum is scored against the simulator's momentum change (MuJoCo contacts
-  with friction and solver softness are not exactly conservative) — the copy
-  says "vs. simulated ground truth," never "vs. conservation law."
-- Diverged model rollouts are flagged and capped, not smoothed over.
-- Traffic-light thresholds are calibrated once, frozen, and printed on the
-  site's method page from the same config the pipeline used.
-- All user-facing claim strings live in `site/copy.md` for single-point review.
+  with friction are not perfectly conservative) — the site says "vs. simulated
+  ground truth," never "vs. conservation law."
+- Model rollouts that blow up are flagged and capped, not smoothed over.
+- Traffic-light thresholds were calibrated once, then frozen; the site prints
+  them from the same config file the pipeline used.
+- Every user-facing claim lives in one file, `site/copy.md`, so it can be
+  reviewed in one place.
