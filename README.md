@@ -1,7 +1,7 @@
-# worldaudit — do learned world models actually know physics?
+# worldaudit
 
-We poke a simulated world, give a learned model of that world the exact same
-poke, and compare what happens next. Every score compares the model against
+We intervene on a simulated world, give a learned model of that world the
+exact same intervention, and compare what happens next. Every score compares the model against
 **simulated ground truth** from a pinned MuJoCo build — never against an
 idealized textbook law.
 
@@ -24,9 +24,10 @@ actually used.
   1000 more steps — the continuation must match the original bit-for-bit.
   A second check confirms two independent simulation code paths agree the
   same way.
-- **Contrast null test:** a poke with zero strength must produce a measured
-  effect of exactly zero — for the simulator, and for the model too (the poked
-  and unpoked runs share the same random numbers, so noise cancels perfectly).
+- **Contrast null test:** an intervention with zero strength must produce a
+  measured effect of exactly zero — for the simulator, and for the model too
+  (the intervened and unintervened runs share the same random numbers, so
+  noise cancels perfectly).
 - Every random number comes from an explicit seed. Every output file is
   immutable and stamped with the exact code version, library versions, and
   settings that produced it; regenerating anything writes to a new path
@@ -47,7 +48,8 @@ cd site && npx vite preview
 ```
 
 `make demo` rebuilds one scene end-to-end (training data, six models of varying
-quality, contrasts + metrics, clips, static site) on a single GPU box.
+quality — each an ensemble of 5 networks — contrasts + metrics, clips, static
+site) on a single GPU box.
 Individual stages: `make data / train / grid / render / site`.
 
 The name-brand audit (`make namebrand`) runs an official TD-MPC2 checkpoint

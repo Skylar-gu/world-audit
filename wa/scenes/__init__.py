@@ -51,6 +51,16 @@ REGISTRY: dict[str, SceneSpec] = {
     s.name: s
     for s in [
         SceneSpec(
+            name="arm",
+            xml="arm.xml",
+            tracked_bodies=("link_1", "link_2", "link_3"),
+            poke_sites=("link_3",),
+            poke_directions={"link_3": (1.0, 0.0, 0.0)},
+            magnitude_range=(0.5, 20.0),
+            subtests=("response", "propagation", "divergence"),
+            chain=("link_3", "link_2", "link_1"),
+        ),
+        SceneSpec(
             name="billiards",
             xml="billiards.xml",
             tracked_bodies=("cue", "ball_1", "ball_2", "ball_3"),
@@ -71,16 +81,6 @@ REGISTRY: dict[str, SceneSpec] = {
             chain=("block_3", "block_2", "block_1", "block_0"),
             topple_body="block_3",
             topple_z=0.20,  # initial top-block z is 0.28; below 0.20 == toppled
-        ),
-        SceneSpec(
-            name="arm",
-            xml="arm.xml",
-            tracked_bodies=("link_1", "link_2", "link_3"),
-            poke_sites=("link_3",),
-            poke_directions={"link_3": (1.0, 0.0, 0.0)},
-            magnitude_range=(0.5, 20.0),
-            subtests=("response", "propagation", "divergence"),
-            chain=("link_3", "link_2", "link_1"),
         ),
     ]
 }
