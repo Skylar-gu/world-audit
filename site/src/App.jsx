@@ -190,6 +190,9 @@ export default function App() {
   }, [])
   if (!manifest) return <div className="loading">loading manifest…</div>
   const tabs = [...manifest.scenes.map((s) => s.name), 'method']
+  const tabLabel = (t) => t.startsWith('tdmpc2-')
+    ? 'TD-MPC2 ' + t.slice('tdmpc2-'.length).split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join('-')
+    : t[0].toUpperCase() + t.slice(1)
   return (
     <div className="wrap">
       <h1>{copy.title}</h1>
@@ -197,7 +200,7 @@ export default function App() {
       <div className="tabs">
         {tabs.map((t, i) => (
           <button key={t} className={`tab ${tab === i ? 'active' : ''}`}
-                  onClick={() => setTab(i)}>{t}</button>
+                  onClick={() => setTab(i)}>{tabLabel(t)}</button>
         ))}
       </div>
       {tab < manifest.scenes.length

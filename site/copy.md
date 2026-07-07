@@ -4,13 +4,13 @@ All user-facing claim strings live in this one file (invariant 7). Review here,
 nowhere else. Keys are `##` headers; body text below each header is the copy.
 
 ## title
-worldaudit
+WorldAudit: Physics Sanity Check for World Models
 
 ## tagline
-We intervene on a simulated world, give a learned model of it the exact same intervention, and compare what happens next. Every score below compares the model to simulated ground truth from a pinned MuJoCo build — never to an idealized textbook law.
+We intervene on a simulated world, give a learned model of it the exact same intervention, and compare what happens next. Every score below compares the model to simulated ground truth from a pinned MuJoCo build.
 
 ## report-intro
-Each row is one learned dynamics model — six in total, spanning small to large networks and short to long training, each an ensemble of 5 networks trained on logged interactions. Each column is one behavioral test built from a matched pair of runs: the same starting state, with and without a calibrated intervention. Click a cell to see the curves and the side-by-side clip.
+Each row is one learned dynamics model: six in total, spanning small to large networks and short to long training, each an ensemble of 5 networks trained on logged interactions. Each column is one behavioral test built from a matched pair of runs: the same starting state, with and without a calibrated intervention. Click a cell to see the curves and the side-by-side clip.
 
 ## legend-green
 matches ground truth
